@@ -11,7 +11,7 @@
       // Apply the theme before React loads so the screen does not flash.
       // "lumbung:tema" is the legacy key (migrated by src/lib/storage.ts).
       try {
-        var t = localStorage.getItem("lumbung:theme") || localStorage.getItem("lumbung:tema") || "system";
+        var t = localStorage.getItem("lumbung:theme") || localStorage.getItem("lumbung:tema") || "light";
         var dark = t === "dark" || (t === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
         if (dark) document.documentElement.classList.add("dark");
       } catch (e) {}

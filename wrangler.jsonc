@@ -1,0 +1,19 @@
+// Cloudflare Workers (static assets) configuration for Lumbung.
+// The app is a static SPA: `pnpm build` writes to dist/, and Cloudflare serves it.
+{
+  "name": "lumbung",
+  "compatibility_date": "2025-09-01",
+  // Public URL: https://lumbung.<account-subdomain>.workers.dev
+  "workers_dev": true,
+  // Unique URL per deployment/branch for testing before production.
+  "preview_urls": true,
+  "assets": {
+    "directory": "./dist",
+    // Unknown paths (e.g. /beranda opened directly) get index.html,
+    // so React Router can render the page — including the in-app 404 page.
+    "not_found_handling": "single-page-application"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

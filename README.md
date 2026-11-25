@@ -146,27 +146,29 @@ Laporan bulanan/tahunan, ekspor CSV/Excel/PDF, backup & restore, foto struk, kun
   kategori bawaan) dan URL halaman (`/beranda`, `/transaksi`, `/dompet`, `/pengaturan`, `/masuk`, …)
   yang berbahasa Indonesia.
 
-## Deploy ke Cloudflare Pages
+## Deploy ke Cloudflare (Workers)
 
-1. Push repo ke GitHub, lalu di Cloudflare: **Workers & Pages → Create → Pages → Connect to Git**.
+Konfigurasi ada di `wrangler.jsonc`: hasil build `dist/` disajikan sebagai static assets dengan
+`not_found_handling = "single-page-application"` (agar `/beranda`, `/transaksi`, … bisa dibuka
+langsung) dan URL `workers.dev` aktif.
+
+1. Push repo ke GitHub, lalu di Cloudflare: **Workers & Pages → Create → Import a repository**.
 2. Pengaturan build:
-   - *Framework preset*: **Vite** (atau None)
    - *Build command*: `pnpm build`
-   - *Build output directory*: `dist`
+   - *Deploy command*: `npx wrangler deploy`
    - Versi Node diambil dari `.node-version` (22). pnpm terdeteksi otomatis dari `pnpm-lock.yaml`.
-3. **Environment variables** (Production & Preview): `VITE_SUPABASE_URL` dan
-   `VITE_SUPABASE_PUBLISHABLE_KEY`. Setelah mengubahnya, jalankan ulang deploy (nilai dibaca saat build).
-4. Di **Supabase → Authentication → URL Configuration**: isi *Site URL* dengan domain produksi
-   (misal `https://lumbung.pages.dev`), lalu tambahkan `https://<domain>/reset-password` ke
-   *Redirect URLs*. Tambahkan juga domain preview jika ingin mencoba login di sana.
+3. **Variables** (Settings → Build → Variables and secrets, yaitu variabel saat *build*):
+   `VITE_SUPABASE_URL` dan `VITE_SUPABASE_PUBLISHABLE_KEY`. Setelah mengubahnya, jalankan ulang
+   deploy karena nilainya dibaca saat build.
+4. Di **Supabase → Authentication → URL Configuration**: isi *Site URL* dengan URL produksi
+   (misal `https://lumbung.<subdomain>.workers.dev`), lalu tambahkan `https://<domain>/reset-password`
+   ke *Redirect URLs*.
 
 Catatan:
-- Routing SPA (`/beranda`, `/transaksi`, …) langsung berfungsi karena hasil build tidak memiliki
-  `404.html` — Cloudflare Pages otomatis mengarahkan ke `index.html`. Jangan menambahkan `404.html`;
-  halaman 404 sudah ditangani oleh rute aplikasi (`src/pages/not-found.tsx`).
-- Header cache & keamanan diatur di `public/_headers`.
-- Jika memakai **Workers (static assets)** alih-alih Pages, set `not_found_handling = "single-page-application"`
-  di konfigurasi Wrangler agar routing SPA tetap berfungsi.
+- Halaman 404 ditangani oleh rute aplikasi (`src/pages/not-found.tsx`); jangan menambahkan `404.html`.
+- Header cache & keamanan diatur di `public/_headers` (didukung Workers static assets).
+- Jika memakai **Cloudflare Pages** alih-alih Workers, `wrangler.jsonc` tidak dipakai dan routing SPA
+  aktif otomatis selama tidak ada `404.html`.
 
 ## Buku panduan pengguna
 

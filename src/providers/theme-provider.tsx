@@ -12,7 +12,8 @@ function readTheme(): Theme {
   } catch {
     // storage blocked
   }
-  return "system"
+  // Default for new devices: light. Users can still pick dark or "follow device".
+  return "light"
 }
 
 function subscribeSystem(cb: () => void) {
