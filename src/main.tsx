@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router"
 import { QueryClientProvider } from "@tanstack/react-query"
 
 import App from "@/App"
+import { PwaUpdatePrompt } from "@/components/pwa/pwa-update-prompt"
 import { Toaster } from "@/components/ui/sonner"
 import { queryClient } from "@/lib/query-client"
 import { migrateLegacyStorageKeys } from "@/lib/storage"
@@ -30,6 +31,7 @@ createRoot(document.getElementById("root")!).render(
         <NotConfiguredPage />
       )}
       <Toaster position="top-center" richColors />
+      <PwaUpdatePrompt />
     </ThemeProvider>
   </StrictMode>
 )

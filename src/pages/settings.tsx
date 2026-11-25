@@ -16,6 +16,7 @@ import { MemberAvatar } from "@/components/common/member-avatar"
 import { ResponsiveSheet } from "@/components/common/responsive-sheet"
 import { Loading } from "@/components/common/status"
 import { MemberForm } from "@/components/members/member-form"
+import { InstallAppCard } from "@/components/pwa/install-app-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -201,6 +202,8 @@ export function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        <InstallAppCard />
 
         {/* Help */}
         <Card>

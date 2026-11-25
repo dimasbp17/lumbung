@@ -70,6 +70,7 @@ pnpm dev        # http://localhost:5173
 pnpm build      # build produksi (typecheck + bundle)
 pnpm lint
 pnpm guide:pdf  # buat ulang buku panduan PDF (butuh Chrome/Edge terpasang)
+pnpm pwa:icons  # buat ulang ikon PWA dari logo SVG
 ```
 
 ### Akun demo (Supabase lokal)
@@ -119,6 +120,16 @@ cukup daftar akun baru.
 - **Pencarian & filter transaksi**: cari catatan/nama kategori; filter jenis, kategori, dompet,
   pencatat, dan waktu (per periode, semua waktu, atau rentang tanggal)
 - Menu **Lainnya** (`/lainnya`) di HP untuk fitur yang tidak muat di dock bawah
+
+### ✅ PWA
+
+- Bisa dipasang sebagai aplikasi (manifest, ikon, layar penuh); tombol **Pasang aplikasi** di
+  Pengaturan, petunjuk khusus iPhone
+- Service worker (`vite-plugin-pwa`) menyimpan file aplikasi sehingga terbuka cepat dan tetap
+  bisa dibuka saat offline; data Supabase tidak di-cache (selalu terbaru)
+- Versi baru tidak memuat ulang otomatis — muncul pesan **Muat ulang** agar isian form tidak hilang
+- Banner "Anda sedang offline"
+- Ikon dibuat dari `public/images/logo-lumbung.svg` dengan `pnpm pwa:icons`
 
 ### ⏳ Fase 3 — Laporan & pelengkap (belum)
 

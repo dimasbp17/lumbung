@@ -8,6 +8,13 @@
 /downloads/*
   Cache-Control: public, max-age=0, must-revalidate
 
+# Service worker & manifest must always be fresh so updates reach users.
+/sw.js
+  Cache-Control: no-cache
+
+/manifest.webmanifest
+  Cache-Control: no-cache
+
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY

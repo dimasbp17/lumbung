@@ -3,6 +3,7 @@ import { Plus } from "lucide-react"
 
 import { Logo } from "@/components/layout/logo"
 import { TopBar } from "@/components/layout/top-bar"
+import { OfflineBanner } from "@/components/pwa/offline-banner"
 import { Button } from "@/components/ui/button"
 import { useLookups } from "@/hooks/use-lookups"
 import { dockNav, mainNav, morePaths, planningNav, settingsNav, type NavItem } from "@/lib/navigation"
@@ -105,6 +106,7 @@ export function AppLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
+        <OfflineBanner />
         <main className="mx-auto w-full max-w-4xl flex-1 px-4 pt-5 pb-36 md:px-10 md:pt-8 md:pb-10">
           <Outlet />
         </main>
