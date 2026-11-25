@@ -3,6 +3,7 @@ import { Plus } from "lucide-react"
 
 import { Logo } from "@/components/layout/logo"
 import { TopBar } from "@/components/layout/top-bar"
+import { MemberChoicePrompt } from "@/components/members/member-choice-prompt"
 import { OfflineBanner } from "@/components/pwa/offline-banner"
 import { Button } from "@/components/ui/button"
 import { useLookups } from "@/hooks/use-lookups"
@@ -132,6 +133,8 @@ export function AppLayout() {
         <DockLink item={dockNav[2]} />
         <DockLink item={dockNav[3]} />
       </nav>
+
+      <MemberChoicePrompt />
     </div>
   )
 }

@@ -73,15 +73,18 @@ function subscribe(cb: () => void) {
 }
 
 /**
- * The member last selected on this device. If that member has been deleted,
- * falls back to the first member.
+ * The member last selected on this device. If nothing valid is stored (new
+ * device, cleared storage, member deleted), falls back to the first member and
+ * `hasChoice` is false so the app can ask who is using this device.
  */
 export function useLastMember() {
-  const { data: members = [] } = useMembers()
+  const { data: members = [], isSuccess } = useMembers()
   const stored = useSyncExternalStore(subscribe, readStored, () => null)
 
-  const memberId =
-    members.find((m) => m.id === stored)?.id ?? members[0]?.id ?? null
+  const storedMemberId = members.find((m) => m.id === stored)?.id ?? null
+  const memberId = storedMemberId ?? members[0]?.id ?? null
+  /** False only once members have loaded and none matches the stored choice. */
+  const hasChoice = !isSuccess || storedMemberId !== null
 
   const setLastMember = useCallback((id: string) => {
     try {
@@ -92,5 +95,5 @@ export function useLastMember() {
     listeners.forEach((cb) => cb())
   }, [])
 
-  return { memberId, setLastMember }
+  return { memberId, hasChoice, setLastMember }
 }
