@@ -1,0 +1,665 @@
+<!doctype html>
+<!--
+  Lumbung user guide (Indonesian). Source for public/downloads/panduan-lumbung.pdf.
+  Rebuild the PDF after editing:  pnpm guide:pdf
+-->
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<title>Panduan Pengguna Lumbung</title>
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "Inter";
+    src: url("../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-italic.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: italic;
+  }
+
+  :root {
+    --primary: #007f51;
+    --primary-light: #35cb90;
+    --accent: #dcf4e7;
+    --accent-fg: #004a30;
+    --bg-soft: #f3f8f6;
+    --text: #0f1b17;
+    --muted: #586761;
+    --border: #dde5e1;
+    --red: #dc2626;
+    --emerald: #059669;
+    --sky: #0284c7;
+    --amber: #b45309;
+  }
+
+  @page {
+    size: A4;
+    margin: 20mm 18mm 22mm;
+    @bottom-left {
+      content: "Panduan Pengguna Lumbung";
+      font-family: Inter, sans-serif;
+      font-size: 8.5pt;
+      color: #8a9a93;
+    }
+    @bottom-right {
+      content: counter(page);
+      font-family: Inter, sans-serif;
+      font-size: 8.5pt;
+      color: #8a9a93;
+    }
+  }
+  @page cover {
+    margin: 0;
+    @bottom-left { content: none; }
+    @bottom-right { content: none; }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* ---------- cover ---------- */
+  .cover {
+    page: cover;
+    position: relative;
+    height: 297mm;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 30mm 22mm 24mm;
+    background: linear-gradient(150deg, #059669 0%, #047857 45%, #115e59 100%);
+    color: white;
+  }
+  .cover .glow { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.09); }
+  .cover .g1 { width: 150mm; height: 150mm; top: -50mm; right: -45mm; }
+  .cover .g2 { width: 190mm; height: 190mm; bottom: -90mm; left: -70mm; background: rgba(255,255,255,0.06); }
+  .cover .g3 { width: 70mm; height: 70mm; bottom: 60mm; right: 20mm; background: rgba(253,230,138,0.14); }
+  .cover-top, .cover-bottom { position: relative; }
+  .cover-logo { width: 34mm; height: 34mm; filter: drop-shadow(0 6px 18px rgba(0,0,0,0.25)); }
+  .cover h1 { font-size: 40pt; line-height: 1.05; margin: 14mm 0 5mm; letter-spacing: -0.02em; }
+  .cover .subtitle { font-size: 15pt; opacity: 0.9; max-width: 130mm; margin: 0; }
+  .cover-bottom { display: flex; justify-content: space-between; align-items: flex-end; font-size: 10pt; opacity: 0.85; }
+  .cover-bottom strong { display: block; font-size: 13pt; opacity: 1; }
+
+  /* ---------- typography ---------- */
+  h2.chapter {
+    break-before: page;
+    font-size: 21pt;
+    line-height: 1.2;
+    margin: 0 0 2mm;
+    letter-spacing: -0.01em;
+  }
+  .chapter-no {
+    display: inline-block;
+    font-size: 9pt;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 1mm;
+  }
+  .lead { color: var(--muted); font-size: 11pt; margin: 0 0 6mm; }
+  h3 { font-size: 13pt; margin: 5.5mm 0 1.5mm; break-after: avoid; }
+  h4 { font-size: 11pt; margin: 5mm 0 1.5mm; break-after: avoid; }
+  p { margin: 0 0 3mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+  li { margin-bottom: 1.2mm; }
+  strong { font-weight: 600; }
+  .ui {
+    display: inline-block;
+    padding: 0 1.6mm;
+    border-radius: 1.2mm;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-weight: 600;
+    font-size: 9.5pt;
+    white-space: nowrap;
+  }
+  .muted { color: var(--muted); }
+  .income { color: var(--emerald); font-weight: 600; }
+  .expense { color: var(--red); font-weight: 600; }
+  .transfer { color: var(--sky); font-weight: 600; }
+
+  /* ---------- blocks ---------- */
+  .steps { list-style: none; padding: 0; counter-reset: step; }
+  .steps li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 10mm;
+    margin-bottom: 2.5mm;
+    break-inside: avoid;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0.3mm;
+    width: 6.5mm;
+    height: 6.5mm;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-size: 8.5pt;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .note {
+    break-inside: avoid;
+    border-radius: 3mm;
+    padding: 3.5mm 4.5mm;
+    margin: 4mm 0;
+    background: var(--bg-soft);
+    border-left: 1.2mm solid var(--primary-light);
+  }
+  .note.warn { background: #fff7ed; border-left-color: #f59e0b; }
+  .note .label {
+    display: block;
+    font-size: 8.5pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 0.8mm;
+  }
+  .note.warn .label { color: var(--amber); }
+  .note p:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 3mm 0 5mm; font-size: 9.5pt; break-inside: avoid; }
+  th, td { text-align: left; padding: 2mm 3mm; border-bottom: 0.3mm solid var(--border); vertical-align: top; }
+  th { background: var(--bg-soft); font-weight: 600; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 3mm 0 5mm; }
+  .card {
+    break-inside: avoid;
+    border: 0.3mm solid var(--border);
+    border-radius: 3mm;
+    padding: 3.5mm 4mm;
+  }
+  .card h4 { margin-top: 0; }
+  .card p:last-child { margin-bottom: 0; }
+
+  /* Small mock-ups of app controls */
+  .mock {
+    break-inside: avoid;
+    display: flex;
+    gap: 1mm;
+    padding: 1mm;
+    border-radius: 3mm;
+    background: #ebf2ef;
+    width: 105mm;
+    margin: 2mm 0 4mm;
+    font-size: 9pt;
+    font-weight: 600;
+  }
+  .mock span { flex: 1; text-align: center; padding: 2mm 0; border-radius: 2.2mm; color: var(--muted); }
+  .mock .on-red { background: var(--red); color: white; }
+  .balance-mock {
+    break-inside: avoid;
+    width: 105mm;
+    border-radius: 4mm;
+    padding: 4mm 5mm;
+    margin: 2mm 0 5mm;
+    color: white;
+    background: linear-gradient(135deg, #059669, #047857 55%, #115e59);
+  }
+  .balance-mock small { opacity: 0.8; font-size: 8.5pt; display: block; }
+  .balance-mock b { font-size: 17pt; display: block; margin: 0.5mm 0 2.5mm; }
+  .balance-mock .row { display: flex; gap: 2mm; }
+  .balance-mock .row div { flex: 1; background: rgba(255,255,255,0.14); border-radius: 2.5mm; padding: 2mm 3mm; font-size: 8.5pt; }
+  .progress { height: 2.4mm; border-radius: 2mm; background: #ebf2ef; overflow: hidden; margin: 1.5mm 0; }
+  .progress div { height: 100%; border-radius: 2mm; }
+
+  /* ---------- table of contents ---------- */
+  .toc-title { font-size: 21pt; margin: 0 0 6mm; }
+  .toc { list-style: none; padding: 0; columns: 1; }
+  .toc li { display: flex; gap: 4mm; padding: 2.4mm 0; border-bottom: 0.3mm dashed var(--border); margin: 0; }
+  .toc .n { width: 8mm; color: var(--primary); font-weight: 700; }
+  .toc a { color: var(--text); text-decoration: none; flex: 1; }
+  .toc .d { color: var(--muted); font-size: 9pt; }
+  a { color: var(--primary); }
+</style>
+</head>
+<body>
+
+<!-- ====================================================================== -->
+<section class="cover">
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+  <div class="glow g3"></div>
+  <div class="cover-top">
+    <svg class="cover-logo" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="120" height="120" rx="28" fill="#007f51" />
+      <path d="M29.5 51.5C27.2 53.6 27 57.2 29.1 59.5C31.2 61.8 34.8 62 37.1 59.9L60 39.2L82.9 59.9C85.2 62 88.8 61.8 90.9 59.5C93 57.2 92.8 53.6 90.5 51.5L64.7 28.2C62 25.8 58 25.8 55.3 28.2L29.5 51.5Z" fill="#dcf4e7" />
+      <path d="M41 53C41 49.134 44.134 46 48 46C51.866 46 55 49.134 55 53V73C55 75.2091 56.7909 77 59 77H81C84.866 77 88 80.134 88 84C88 87.866 84.866 91 81 91H53C46.3726 91 41 85.6274 41 79V53Z" fill="#FFFFFF" />
+      <path d="M82 48C69.8497 48 61 56.8497 61 69C61 69.5523 61.4477 70 62 70C74.1503 70 83 61.1503 83 49C83 48.4477 82.5523 48 82 48Z" fill="#35cb90" />
+    </svg>
+    <h1>Panduan<br />Pengguna Lumbung</h1>
+    <p class="subtitle">Cara mencatat, merencanakan, dan mengelola keuangan keluarga bersama-sama.</p>
+  </div>
+  <div class="cover-bottom">
+    <div><strong>Lumbung</strong>Catatan keuangan keluarga</div>
+    <div>Edisi November 2026</div>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<section style="break-before: page">
+  <h2 class="toc-title">Daftar isi</h2>
+  <ol class="toc">
+    <li><span class="n">1</span><a href="#kenal">Mengenal Lumbung</a><span class="d">istilah penting</span></li>
+    <li><span class="n">2</span><a href="#mulai">Memulai</a><span class="d">daftar, masuk, profil</span></li>
+    <li><span class="n">3</span><a href="#tampilan">Berkeliling aplikasi</a><span class="d">beranda &amp; navigasi</span></li>
+    <li><span class="n">4</span><a href="#transaksi">Mencatat transaksi</a><span class="d">pengeluaran, pemasukan, transfer</span></li>
+    <li><span class="n">5</span><a href="#cari">Melihat &amp; mencari transaksi</a><span class="d">periode, pencarian, filter</span></li>
+    <li><span class="n">6</span><a href="#dompet">Dompet</a><span class="d">tunai, rekening, e-wallet</span></li>
+    <li><span class="n">7</span><a href="#kategori">Kategori</a><span class="d">mengelompokkan transaksi</span></li>
+    <li><span class="n">8</span><a href="#anggaran">Anggaran</a><span class="d">batas belanja</span></li>
+    <li><span class="n">9</span><a href="#tabungan">Tujuan tabungan</a><span class="d">menabung untuk rencana</span></li>
+    <li><span class="n">10</span><a href="#tagihan">Tagihan rutin</a><span class="d">listrik, SPP, cicilan, gaji</span></li>
+    <li><span class="n">11</span><a href="#utang">Utang-piutang</a><span class="d">pinjaman &amp; cicilan</span></li>
+    <li><span class="n">12</span><a href="#pengaturan">Pengaturan</a><span class="d">anggota, periode, tampilan</span></li>
+    <li><span class="n">13</span><a href="#tanya">Tanya jawab</a><span class="d">masalah yang sering ditemui</span></li>
+  </ol>
+
+  <div class="note" style="margin-top: 10mm">
+    <span class="label">Cara membaca panduan ini</span>
+    <p>Teks seperti <span class="ui">Catat transaksi</span> adalah nama tombol atau menu yang tertulis di aplikasi.
+      Anda tidak perlu membaca berurutan — langsung buka bab fitur yang ingin dipakai.</p>
+  </div>
+</section>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="kenal"><span class="chapter-no">Bab 1</span><br />Mengenal Lumbung</h2>
+<p class="lead">Lumbung adalah aplikasi pencatat keuangan untuk satu keluarga: suami, istri, dan anggota lain memakai satu akun yang sama.</p>
+
+<h3>Satu akun, dipakai bersama</h3>
+<p>Berbeda dengan aplikasi keuangan pribadi, Lumbung dirancang agar <strong>satu keluarga memakai satu akun</strong>.
+  Suami dan istri masuk dengan email dan kata sandi yang sama, di HP masing-masing. Semua catatan langsung terlihat oleh keduanya.</p>
+<p>Agar tetap jelas siapa mencatat apa, setiap anggota punya <strong>profil</strong> sendiri (misalnya <em>Suami</em> dan <em>Istri</em>).
+  Setiap transaksi menyimpan keterangan <strong>"Dicatat oleh"</strong>.</p>
+
+<h3>Istilah penting</h3>
+<table>
+  <tr><th style="width:30%">Istilah</th><th>Artinya</th></tr>
+  <tr><td><strong>Dompet</strong></td><td>Tempat uang berada: uang tunai, rekening bank, atau e-wallet (GoPay, OVO, DANA, dan lainnya). Setiap transaksi selalu terjadi di satu dompet.</td></tr>
+  <tr><td><strong>Transaksi</strong></td><td>Satu catatan uang masuk atau keluar. Ada tiga jenis: <span class="expense">pengeluaran</span>, <span class="income">pemasukan</span>, dan <span class="transfer">transfer</span>.</td></tr>
+  <tr><td><strong>Kategori</strong></td><td>Kelompok transaksi, misalnya <em>Makan &amp; Minum</em>, <em>Listrik &amp; Air</em>, atau <em>Gaji</em>.</td></tr>
+  <tr><td><strong>Periode</strong></td><td>Rentang satu bulan untuk ringkasan dan anggaran. Bisa dimulai tanggal 1, atau mengikuti tanggal gajian (misal tanggal 25 sampai 24 bulan berikutnya).</td></tr>
+  <tr><td><strong>Profil</strong></td><td>Anggota keluarga yang mencatat. Setiap HP mengingat profil siapa yang biasa memakainya.</td></tr>
+  <tr><td><strong>Saldo</strong></td><td>Jumlah uang di sebuah dompet. Dihitung otomatis oleh Lumbung, tidak perlu diubah manual.</td></tr>
+</table>
+
+<h3>Semua nominal dalam Rupiah</h3>
+<p>Nominal ditulis tanpa desimal, dengan pemisah ribuan otomatis — misalnya <strong>Rp 1.500.000</strong>.
+  Saat mengetik, cukup ketik angkanya (1500000); titik pemisah muncul sendiri.</p>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="mulai"><span class="chapter-no">Bab 2</span><br />Memulai</h2>
+<p class="lead">Buat akun keluarga sekali, lalu masuk dari HP atau komputer mana pun.</p>
+
+<h3>Mendaftar akun keluarga</h3>
+<ol class="steps">
+  <li>Buka halaman depan Lumbung, lalu tekan <span class="ui">Daftar</span> atau <span class="ui">Mulai sekarang</span>.</li>
+  <li>Isi email keluarga dan kata sandi (minimal 6 karakter), lalu ulangi kata sandi.</li>
+  <li>Tekan <span class="ui">Daftar</span>. Jika diminta, buka email Anda dan klik tautan konfirmasi.</li>
+  <li>Selesai. Lumbung otomatis menyiapkan profil <em>Suami</em> dan <em>Istri</em>, satu dompet <em>Dompet Tunai</em>, serta 19 kategori bawaan.</li>
+</ol>
+<div class="note">
+  <span class="label">Tips</span>
+  <p>Gunakan email yang bisa dibuka oleh suami maupun istri, karena tautan reset kata sandi dikirim ke email ini.</p>
+</div>
+
+<h3>Masuk dan keluar</h3>
+<p>Tekan <span class="ui">Masuk</span>, isi email dan kata sandi. Untuk keluar, buka menu profil (foto bulat di kanan atas) lalu pilih <span class="ui">Keluar</span>, atau tekan tombol <span class="ui">Keluar</span> di halaman Pengaturan.</p>
+
+<h3>Lupa kata sandi</h3>
+<ol class="steps">
+  <li>Di halaman masuk, tekan <span class="ui">Lupa kata sandi?</span>.</li>
+  <li>Masukkan email akun keluarga, lalu tekan <span class="ui">Kirim tautan</span>.</li>
+  <li>Buka email dari Lumbung, klik tautannya, lalu buat kata sandi baru.</li>
+</ol>
+
+<h3>Memilih profil di HP Anda</h3>
+<p>Setelah masuk pertama kali, beri tahu Lumbung siapa pemakai HP ini, agar kolom "Dicatat oleh" terisi otomatis:</p>
+<ol class="steps">
+  <li>Tekan foto profil di kanan atas.</li>
+  <li>Pada bagian <strong>Profil di perangkat ini</strong>, pilih nama Anda. Pilihan ini hanya tersimpan di HP tersebut; pasangan Anda melakukan hal yang sama di HP-nya.</li>
+</ol>
+
+<h3>Menaruh Lumbung di layar utama HP</h3>
+<p>Agar bisa dibuka seperti aplikasi biasa, buka Lumbung di browser HP. Di <strong>Android (Chrome)</strong> tekan menu titik tiga → <em>Tambahkan ke layar utama</em>; di <strong>iPhone (Safari)</strong> tekan tombol bagikan → <em>Tambah ke Layar Utama</em>.</p>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="tampilan"><span class="chapter-no">Bab 3</span><br />Berkeliling aplikasi</h2>
+<p class="lead">Kenali bagian-bagian layar agar cepat menemukan fitur yang dibutuhkan.</p>
+
+<h3>Navigasi</h3>
+<div class="grid2">
+  <div class="card">
+    <h4>Di HP</h4>
+    <p>Menu ada di <strong>bilah bawah</strong>: Beranda, Transaksi, tombol <strong>+</strong> besar di tengah, Dompet, dan Lainnya.
+      Menu <span class="ui">Lainnya</span> berisi Anggaran, Tabungan, Tagihan rutin, Utang-piutang, Pengaturan, dan Kategori.</p>
+  </div>
+  <div class="card">
+    <h4>Di komputer</h4>
+    <p>Semua menu ada di <strong>sisi kiri</strong>, dikelompokkan menjadi menu utama dan <em>Perencanaan</em>.
+      Tombol <span class="ui">Catat transaksi</span> selalu ada di bagian atasnya.</p>
+  </div>
+</div>
+<p>Di bagian atas setiap halaman terdapat <strong>judul halaman</strong> dan <strong>menu profil</strong>. Menu profil berisi pilihan profil untuk perangkat ini, Pengaturan, Halaman depan, dan Keluar.</p>
+
+<h3>Beranda</h3>
+<p>Beranda memberi gambaran keuangan keluarga dalam sekali lihat:</p>
+<div class="balance-mock">
+  <small>Total saldo semua dompet</small>
+  <b>Rp 12.450.000</b>
+  <div class="row"><div>Pemasukan<br /><strong>Rp 11.500.000</strong></div><div>Pengeluaran<br /><strong>Rp 6.820.000</strong></div></div>
+</div>
+<ul>
+  <li><strong>Kartu saldo</strong> — total uang di semua dompet, serta pemasukan, pengeluaran, dan selisih pada periode ini.</li>
+  <li><strong>Catat cepat</strong> — tiga tombol untuk langsung mencatat pengeluaran, pemasukan, atau transfer.</li>
+  <li><strong>Tagihan terdekat</strong> — tagihan yang terlambat atau jatuh tempo dalam 7 hari (muncul jika ada).</li>
+  <li><strong>Anggaran periode ini</strong> — anggaran yang paling mendekati batas (muncul jika sudah membuat anggaran).</li>
+  <li><strong>Pengeluaran per kategori</strong> — grafik lingkaran lima kategori terbesar.</li>
+  <li><strong>Transaksi terakhir</strong> — lima catatan terbaru.</li>
+</ul>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="transaksi"><span class="chapter-no">Bab 4</span><br />Mencatat transaksi</h2>
+<p class="lead">Kebiasaan terpenting: catat setiap uang keluar dan masuk, sesegera mungkin.</p>
+
+<h3>Tiga jenis transaksi</h3>
+<table>
+  <tr><th style="width:24%">Jenis</th><th>Kapan dipakai</th><th style="width:30%">Contoh</th></tr>
+  <tr><td><span class="expense">Pengeluaran</span></td><td>Uang keluar untuk membeli atau membayar sesuatu.</td><td>Belanja dapur, bensin, SPP</td></tr>
+  <tr><td><span class="income">Pemasukan</span></td><td>Uang masuk ke keluarga.</td><td>Gaji, hasil usaha, THR</td></tr>
+  <tr><td><span class="transfer">Transfer</span></td><td>Memindahkan uang antar dompet sendiri. Tidak dihitung sebagai pemasukan maupun pengeluaran.</td><td>Tarik tunai di ATM, isi saldo GoPay</td></tr>
+</table>
+
+<h3>Langkah mencatat</h3>
+<ol class="steps">
+  <li>Tekan tombol <strong>+</strong> (HP) atau <span class="ui">Catat transaksi</span> (komputer).</li>
+  <li>Pilih jenis transaksi di bagian atas:
+    <div class="mock"><span class="on-red">Pengeluaran</span><span>Pemasukan</span><span>Transfer</span></div>
+  </li>
+  <li>Ketik <strong>nominal</strong>.</li>
+  <li>Pilih <strong>kategori</strong> dengan mengetuk ikonnya, lalu pilih <strong>dompet</strong>. Untuk transfer, pilih dompet asal dan dompet tujuan.</li>
+  <li>Periksa <strong>tanggal</strong> (otomatis hari ini), tambahkan <strong>catatan</strong> bila perlu, misal "belanja di pasar".</li>
+  <li>Pastikan <strong>Dicatat oleh</strong> sudah benar, lalu tekan <span class="ui">Simpan</span>.</li>
+</ol>
+
+<div class="note">
+  <span class="label">Cukup dicatat sekali</span>
+  <p>Gaji Rp 3.000.000 masuk ke rekening? Catat <strong>satu</strong> transaksi: jenis <span class="income">Pemasukan</span>, kategori <em>Gaji</em>, dompet <em>Rekening BRI</em>.
+    Saldo rekening langsung bertambah — tidak perlu mencatat transfer atau mengubah saldo dompet.</p>
+</div>
+
+<h3>Contoh satu bulan</h3>
+<table>
+  <tr><th>Kejadian</th><th style="width:25%">Dicatat sebagai</th><th style="width:30%">Dompet</th></tr>
+  <tr><td>Gaji masuk Rp 3.000.000</td><td><span class="income">Pemasukan</span> · Gaji</td><td>Rekening BRI</td></tr>
+  <tr><td>Tarik tunai di ATM Rp 500.000</td><td><span class="transfer">Transfer</span></td><td>Rekening BRI → Dompet Tunai</td></tr>
+  <tr><td>Belanja di pasar Rp 150.000</td><td><span class="expense">Pengeluaran</span> · Belanja Dapur</td><td>Dompet Tunai</td></tr>
+  <tr><td>Bayar listrik lewat m-banking Rp 200.000</td><td><span class="expense">Pengeluaran</span> · Listrik &amp; Air</td><td>Rekening BRI</td></tr>
+</table>
+<p class="muted">Hasilnya: pemasukan Rp 3.000.000, pengeluaran Rp 350.000. Tarik tunai tidak dihitung sebagai pengeluaran karena uangnya hanya pindah dompet.</p>
+
+<h3>Mengubah atau menghapus</h3>
+<p>Ketuk transaksi di daftar mana pun untuk membukanya. Ubah isiannya lalu tekan <span class="ui">Simpan</span>, atau tekan <span class="ui">Hapus</span> dan konfirmasi.
+  Saldo dompet otomatis dihitung ulang.</p>
+
+<div class="note">
+  <span class="label">Tips</span>
+  <p>Catatan pendek sangat membantu saat mencari transaksi di kemudian hari — misalnya nama toko atau keperluannya.</p>
+</div>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="cari"><span class="chapter-no">Bab 5</span><br />Melihat &amp; mencari transaksi</h2>
+<p class="lead">Halaman Transaksi menampilkan semua catatan, dikelompokkan per tanggal beserta total hariannya.</p>
+
+<h3>Berpindah periode</h3>
+<p>Gunakan tombol panah kiri dan kanan di bawah kolom pencarian untuk melihat periode sebelumnya. Tekan <span class="ui">Kembali ke periode ini</span> untuk kembali.
+  Ringkasan pemasukan, pengeluaran, dan selisih ikut menyesuaikan.</p>
+
+<h3>Mencari</h3>
+<p>Ketik kata kunci di kolom <strong>Cari catatan atau kategori…</strong>. Lumbung mencari pada catatan transaksi dan nama kategori. Contoh: ketik <em>bensin</em> atau <em>listrik</em>.</p>
+
+<h3>Menyaring dengan filter</h3>
+<ol class="steps">
+  <li>Tekan tombol <span class="ui">Filter</span> di samping kolom pencarian.</li>
+  <li>Pilih yang dibutuhkan: <strong>jenis</strong>, <strong>kategori</strong>, <strong>dompet</strong>, <strong>dicatat oleh</strong>, dan <strong>waktu</strong> (per periode, semua waktu, atau tanggal tertentu).</li>
+  <li>Tekan <span class="ui">Terapkan</span>.</li>
+</ol>
+<p>Filter yang aktif tampil sebagai label di bawah kolom pencarian. Ketuk label untuk menghapus satu filter, atau <span class="ui">Hapus semua</span> untuk mengembalikan tampilan semula.</p>
+<div class="note">
+  <span class="label">Contoh</span>
+  <p>"Berapa belanja dapur yang dicatat Istri selama tahun ini?" — pilih kategori <em>Belanja Dapur</em>, dicatat oleh <em>Istri</em>, waktu <em>Pilih tanggal</em> 1 Januari sampai hari ini. Totalnya tampil di ringkasan.</p>
+</div>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="dompet"><span class="chapter-no">Bab 6</span><br />Dompet</h2>
+<p class="lead">Buat satu dompet untuk setiap tempat uang keluarga berada.</p>
+
+<h3>Menambah dompet</h3>
+<ol class="steps">
+  <li>Buka <span class="ui">Dompet</span>, lalu tekan <span class="ui">Tambah dompet</span>.</li>
+  <li>Isi nama (misal "Rekening BRI"), pilih jenisnya: <em>Tunai</em>, <em>Rekening Bank</em>, <em>E-Wallet</em>, atau <em>Lainnya</em>.</li>
+  <li>Isi <strong>saldo sekarang</strong> — jumlah uang yang ada di dompet itu saat ini (boleh 0).</li>
+  <li>Pilih warna dan ikon, lalu tekan <span class="ui">Simpan</span>.</li>
+</ol>
+
+<h3>Saldo awal dan saldo saat ini</h3>
+<table>
+  <tr><th style="width:24%"></th><th>Saldo awal</th><th>Saldo saat ini</th></tr>
+  <tr><td><strong>Artinya</strong></td><td>Uang di dompet saat pertama kali mulai memakai Lumbung</td><td>Uang di dompet sekarang</td></tr>
+  <tr><td><strong>Diisi oleh</strong></td><td>Anda, sekali saja saat membuat dompet</td><td>Dihitung otomatis</td></tr>
+  <tr><td><strong>Berubah saat ada transaksi?</strong></td><td>Tidak</td><td>Ya</td></tr>
+</table>
+<p>Saat membuka sebuah dompet, Lumbung menampilkan saldo saat ini beserta rinciannya: saldo awal, pemasukan, pengeluaran, transfer, tabungan, dan utang-piutang.
+  <strong>Jangan mengubah saldo awal</strong> untuk mencatat gaji atau belanja — catat sebagai transaksi agar ringkasan dan anggaran tetap benar.</p>
+<p>Rumus yang dipakai Lumbung:</p>
+<p style="padding: 3mm 4mm; background: var(--bg-soft); border-radius: 2mm">
+  <strong>Saldo</strong> = saldo awal + pemasukan − pengeluaran ± transfer
+  ± setoran tabungan dan utang-piutang yang memakai dompet ini
+</p>
+<div class="note warn">
+  <span class="label">Saldo berbeda dengan kenyataan?</span>
+  <p>Biasanya ada transaksi yang belum dicatat. Cara termudah: catat selisihnya sebagai pengeluaran atau pemasukan dengan kategori <em>Lain-lain</em> dan catatan "penyesuaian saldo".</p>
+</div>
+
+<h3>Transfer dan tarik tunai</h3>
+<p>Di halaman Dompet, tekan <span class="ui">Transfer / tarik tunai</span>. Contoh: tarik Rp 500.000 di ATM — dari <em>Rekening BRI</em> ke <em>Dompet Tunai</em>.</p>
+
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="kategori"><span class="chapter-no">Bab 7</span><br />Kategori</h2>
+<p class="lead">Kategori membuat Anda tahu ke mana uang keluarga paling banyak pergi.</p>
+
+<h3>Kategori bawaan</h3>
+<div class="grid2">
+  <div class="card">
+    <h4>Pengeluaran (14)</h4>
+    <p class="muted">Makan &amp; Minum, Belanja Dapur, Transportasi, Listrik &amp; Air, Internet &amp; Pulsa, Pendidikan, Kesehatan, Cicilan, Arisan, Zakat/Sedekah/Donasi, Hiburan, Pakaian, Kebutuhan Anak, Lain-lain</p>
+  </div>
+  <div class="card">
+    <h4>Pemasukan (5)</h4>
+    <p class="muted">Gaji, Usaha, Bonus/THR, Hadiah, Lain-lain</p>
+  </div>
+</div>
+
+<h3>Menambah dan mengubah</h3>
+<ol class="steps">
+  <li>Buka <span class="ui">Pengaturan</span> → <span class="ui">Kategori</span> (di HP juga lewat menu <span class="ui">Lainnya</span>).</li>
+  <li>Pilih tab <em>Pengeluaran</em> atau <em>Pemasukan</em>.</li>
+  <li>Tekan <span class="ui">Tambah kategori</span>, atau ketuk kategori yang ada untuk mengubah nama, warna, dan ikonnya.</li>
+</ol>
+
+<h3>Menonaktifkan kategori</h3>
+<p>Kategori tidak dihapus, tetapi bisa <strong>dinonaktifkan</strong> lewat sakelar <span class="ui">Kategori aktif</span>. Kategori nonaktif tidak muncul saat mencatat, namun transaksi lama tetap tersimpan dengan kategorinya.</p>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="anggaran"><span class="chapter-no">Bab 8</span><br />Anggaran</h2>
+<p class="lead">Tetapkan batas belanja per kategori agar pengeluaran tidak melebihi kemampuan.</p>
+
+<h3>Membuat anggaran</h3>
+<ol class="steps">
+  <li>Buka <span class="ui">Anggaran</span>, lalu tekan <span class="ui">Tambah anggaran</span>.</li>
+  <li>Pilih kategori pengeluaran, misal <em>Makan &amp; Minum</em>.</li>
+  <li>Isi batas per periode, misal Rp 2.000.000, lalu tekan <span class="ui">Simpan</span>.</li>
+</ol>
+<p>Batas yang sama berlaku setiap periode — tidak perlu dibuat ulang tiap bulan. Setiap kategori hanya bisa memiliki satu anggaran.</p>
+
+<h3>Membaca progres</h3>
+<div class="card" style="width: 120mm; margin-bottom: 4mm">
+  <strong>Makan &amp; Minum</strong> <span class="ui" style="background:#f1f5f2;color:#586761">Hampir habis</span>
+  <div class="progress"><div style="width: 86%; background: #f97316"></div></div>
+  <span class="muted" style="font-size: 9pt">Rp 1.720.000 dari Rp 2.000.000 · Sisa Rp 280.000</span>
+</div>
+<ul>
+  <li><strong>Hampir habis</strong> muncul saat pemakaian mencapai 80% atau lebih.</li>
+  <li><strong>Terlampaui</strong> (merah) muncul saat pengeluaran melebihi batas; tertulis berapa kelebihannya.</li>
+  <li>Gunakan tombol panah untuk melihat anggaran periode sebelumnya.</li>
+</ul>
+<p>Anggaran yang paling mendekati batas juga ditampilkan di Beranda.</p>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="tabungan"><span class="chapter-no">Bab 9</span><br />Tujuan tabungan</h2>
+<p class="lead">Kumpulkan dana untuk rencana keluarga: mudik, sekolah anak, umrah, atau dana darurat.</p>
+
+<h3>Membuat tujuan</h3>
+<ol class="steps">
+  <li>Buka <span class="ui">Tabungan</span>, lalu tekan <span class="ui">Tujuan baru</span>.</li>
+  <li>Isi nama tujuan dan <strong>target dana</strong>.</li>
+  <li>Bila ada, isi <strong>tanggal target</strong>. Lumbung akan menghitung kira-kira berapa yang perlu disisihkan setiap bulan.</li>
+  <li>Pilih warna dan ikon, lalu tekan <span class="ui">Simpan</span>.</li>
+</ol>
+
+<h3>Menyetor dan mengambil</h3>
+<ol class="steps">
+  <li>Ketuk kartu tujuan tabungan.</li>
+  <li>Tekan <span class="ui">Setor</span> untuk menambah, atau <span class="ui">Ambil</span> untuk menarik dana.</li>
+  <li>Isi nominal dan tanggal. Bila uangnya diambil dari (atau dikembalikan ke) dompet tertentu, pilih dompetnya — saldo dompet akan menyesuaikan.</li>
+</ol>
+<div class="note">
+  <span class="label">Kapan memilih dompet?</span>
+  <p>Pilih dompet jika uangnya benar-benar disisihkan dari dompet itu (misal dipindah ke rekening tabungan). Biarkan <em>Tidak terkait dompet</em> jika Anda hanya ingin mencatat niat menabung tanpa mengubah saldo.</p>
+</div>
+<p>Riwayat setoran dan penarikan tampil di halaman detail; catatan yang salah bisa dihapus dengan ikon tempat sampah.</p>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="tagihan"><span class="chapter-no">Bab 10</span><br />Tagihan rutin</h2>
+<p class="lead">Catat sekali, Lumbung mengingatkan setiap kali jatuh tempo. Cocok untuk listrik, internet, SPP, cicilan, arisan, bahkan gaji bulanan.</p>
+
+<h3>Menambah tagihan rutin</h3>
+<ol class="steps">
+  <li>Buka <span class="ui">Tagihan rutin</span>, lalu tekan <span class="ui">Tambah tagihan</span>.</li>
+  <li>Pilih jenisnya (biasanya <em>Pengeluaran</em>; gaji memakai <em>Pemasukan</em>), isi nama dan nominal.</li>
+  <li>Pilih kategori dan dompet yang biasa dipakai membayar.</li>
+  <li>Atur pengulangan: <em>Mingguan</em>, <em>Bulanan</em>, atau <em>Tahunan</em>, dan "setiap berapa" (misal setiap 3 bulan).</li>
+  <li>Isi <strong>jatuh tempo berikutnya</strong>, dan tanggal berakhir bila tagihannya punya batas (misal cicilan 12 bulan).</li>
+</ol>
+<div class="note">
+  <span class="label">Tagihan yang nominalnya berubah</span>
+  <p>Untuk listrik atau air yang jumlahnya tidak tetap, isi perkiraannya saja. Nominal bisa disesuaikan saat tagihan dicatat.</p>
+</div>
+
+<h3>Saat tagihan jatuh tempo</h3>
+<p>Tagihan dikelompokkan menjadi <strong>Jatuh tempo</strong> (hari ini atau terlambat), <strong>7 hari ke depan</strong>, dan <strong>Akan datang</strong>. Tagihan terdekat juga muncul di Beranda.</p>
+<ul>
+  <li><span class="ui">Catat</span> — membuat transaksi dari tagihan ini. Periksa nominal dan tanggal, lalu simpan. Tagihan otomatis berpindah ke jadwal berikutnya.</li>
+  <li><span class="ui">Lewati</span> — melompati jadwal kali ini tanpa mencatat transaksi (misal bulan ini tidak ada tagihan).</li>
+</ul>
+<div class="note warn">
+  <span class="label">Penting</span>
+  <p>Lumbung <strong>tidak</strong> mencatat tagihan secara otomatis. Tagihan baru masuk ke transaksi setelah Anda menekan <span class="ui">Catat</span>, sehingga catatan selalu sesuai dengan uang yang benar-benar keluar.</p>
+</div>
+<p>Untuk menghentikan sementara, buka tagihan dan matikan sakelar <span class="ui">Aktif</span>.</p>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="utang"><span class="chapter-no">Bab 11</span><br />Utang-piutang</h2>
+<p class="lead">Jangan sampai lupa siapa meminjam berapa, dan berapa yang sudah dibayar.</p>
+
+<table>
+  <tr><th style="width:22%">Jenis</th><th>Artinya</th><th style="width:34%">Contoh</th></tr>
+  <tr><td><span class="expense">Utang</span></td><td>Keluarga Anda meminjam uang dari orang lain.</td><td>Pinjam Rp 2.000.000 dari kakak</td></tr>
+  <tr><td><span class="income">Piutang</span></td><td>Keluarga Anda meminjamkan uang kepada orang lain.</td><td>Tetangga pinjam Rp 500.000</td></tr>
+</table>
+
+<h3>Mencatat utang atau piutang</h3>
+<ol class="steps">
+  <li>Buka <span class="ui">Utang-piutang</span>, lalu tekan <span class="ui">Catat baru</span>.</li>
+  <li>Pilih <em>Utang</em> atau <em>Piutang</em>, isi nama orangnya dan nominal.</li>
+  <li>Isi tanggal pinjam dan jatuh tempo (bila ada).</li>
+  <li>Bila uangnya masuk ke atau keluar dari dompet, pilih dompetnya agar saldo menyesuaikan. Tekan <span class="ui">Simpan</span>.</li>
+</ol>
+
+<h3>Mencatat cicilan</h3>
+<ol class="steps">
+  <li>Ketuk nama orang di daftar.</li>
+  <li>Tekan <span class="ui">Catat pembayaran</span> (utang) atau <span class="ui">Catat penerimaan</span> (piutang).</li>
+  <li>Isi nominal, atau tekan <strong>Lunasi</strong> untuk mengisi seluruh sisanya. Simpan.</li>
+</ol>
+<p>Pembayaran tidak bisa melebihi sisa. Setelah lunas, data pindah ke bagian <strong>Sudah lunas</strong>. Ringkasan total utang dan piutang yang belum lunas tampil di bagian atas halaman.</p>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="pengaturan"><span class="chapter-no">Bab 12</span><br />Pengaturan</h2>
+<p class="lead">Sesuaikan Lumbung dengan kebiasaan keluarga Anda.</p>
+
+<h3>Anggota keluarga</h3>
+<p>Tambah, ubah nama, atau ganti warna profil. Tekan <span class="ui">Pakai di sini</span> untuk menjadikan profil tersebut pemakai perangkat ini.
+  Profil bisa dihapus selama masih ada profil lain; transaksi yang pernah dicatatnya tetap tersimpan.</p>
+
+<h3>Periode bulanan</h3>
+<p>Pilih tanggal mulai periode (1–28). Jika gaji diterima tanggal 25, pilih <strong>tanggal 25</strong> — ringkasan dan anggaran akan dihitung dari tanggal 25 sampai tanggal 24 bulan berikutnya.</p>
+
+<h3>Tampilan</h3>
+<p>Pilih <em>Terang</em>, <em>Gelap</em>, atau <em>Ikuti HP</em>. Pilihan ini tersimpan di masing-masing perangkat.</p>
+
+<h3>Panduan</h3>
+<p>Buku panduan ini bisa diunduh kapan saja dari halaman Pengaturan maupun halaman depan Lumbung.</p>
+
+<!-- ====================================================================== -->
+<h2 class="chapter" id="tanya"><span class="chapter-no">Bab 13</span><br />Tanya jawab</h2>
+<p class="lead">Jawaban untuk pertanyaan yang paling sering muncul.</p>
+
+<h4>Apakah suami dan istri bisa mencatat bersamaan dari HP berbeda?</h4>
+<p>Bisa. Masuk dengan akun yang sama di kedua HP. Catatan dari satu HP langsung terlihat di HP lainnya setelah halaman dimuat ulang.</p>
+
+<h4>Mengapa transfer tidak masuk ke pemasukan atau pengeluaran?</h4>
+<p>Karena uangnya hanya berpindah tempat di dalam keluarga — total kekayaan keluarga tidak berubah. Yang berubah hanya saldo kedua dompet.</p>
+
+<h4>Mengapa dompet atau kategori tidak bisa dihapus?</h4>
+<p>Dompet yang masih dipakai catatan lain tidak bisa dihapus agar riwayat tidak rusak. Untuk kategori, gunakan fitur <em>nonaktifkan</em>.</p>
+
+<h4>Saya salah mencatat. Bagaimana memperbaikinya?</h4>
+<p>Ketuk transaksi tersebut, ubah isiannya, lalu simpan — atau hapus. Untuk setoran tabungan dan pembayaran utang, hapus catatannya di halaman detail lalu catat ulang.</p>
+
+<h4>Tagihan saya sudah jatuh tempo tetapi belum masuk ke transaksi.</h4>
+<p>Itu memang disengaja. Tekan <span class="ui">Catat</span> pada tagihan setelah benar-benar dibayar.</p>
+
+<h4>Apakah data keluarga saya aman?</h4>
+<p>Setiap akun keluarga terpisah: data Anda hanya bisa dibaca oleh orang yang masuk dengan akun keluarga Anda. Jaga kerahasiaan kata sandi dan jangan membagikannya di luar keluarga.</p>
+
+<h4>Lupa kata sandi dan tidak bisa membuka email.</h4>
+<p>Tautan reset hanya dikirim ke email akun keluarga. Pastikan email tersebut masih bisa diakses, atau hubungi pengelola Lumbung.</p>
+
+<div class="note" style="margin-top: 10mm">
+  <span class="label">Selamat mencatat!</span>
+  <p>Sedikit demi sedikit, lama-lama menjadi bukit. Mulailah dengan mencatat setiap transaksi hari ini — kebiasaan kecil itulah yang paling berpengaruh.</p>
+</div>
+
+</body>
+</html>

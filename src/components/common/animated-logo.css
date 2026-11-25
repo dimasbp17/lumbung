@@ -1,0 +1,138 @@
+/*
+ * Animated Lumbung logo. Parts (see animated-logo.tsx):
+ *   .al-bg    rounded square background
+ *   .al-roof  barn roof
+ *   .al-l     the "L" body
+ *   .al-leaf  the sprouting leaf
+ *   .al-shine light sweep across the background
+ *
+ * Variants (data-variant on the <svg>):
+ *   intro   — one-shot build-up, then the leaf sways a few times
+ *             (--al-sway-count, default 3; "infinite" keeps it going)
+ *   idle    — already built; leaf sways and the logo floats
+ *   loading — parts pulse in sequence (for loading states)
+ */
+
+.al {
+  overflow: visible;
+}
+
+/* The shine waits off-canvas unless a variant animates it. */
+.al-shine {
+  transform: translateX(-140px) skewX(-20deg);
+}
+
+.al-bg,
+.al-roof,
+.al-l,
+.al-leaf {
+  transform-box: fill-box;
+}
+
+/* ---------- intro ---------- */
+.al[data-variant="intro"] .al-bg {
+  transform-origin: center;
+  animation: al-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.al[data-variant="intro"] .al-roof {
+  transform-origin: center bottom;
+  animation: al-drop 0.7s cubic-bezier(0.34, 1.4, 0.64, 1) 0.35s both;
+}
+.al[data-variant="intro"] .al-l {
+  animation: al-reveal-down 0.55s cubic-bezier(0.65, 0, 0.35, 1) 0.8s both;
+}
+.al[data-variant="intro"] .al-leaf {
+  transform-origin: 0% 100%;
+  animation:
+    al-sprout 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 1.25s both,
+    al-sway 3.2s ease-in-out 2s var(--al-sway-count, 3);
+}
+.al[data-variant="intro"] .al-shine {
+  animation: al-shine 0.9s ease-in-out 1.7s both;
+}
+
+/* ---------- idle ---------- */
+.al[data-variant="idle"] {
+  animation: al-float 4s ease-in-out infinite;
+}
+.al[data-variant="idle"] .al-leaf {
+  transform-origin: 0% 100%;
+  animation: al-sway 3.2s ease-in-out infinite;
+}
+.al[data-variant="idle"] .al-shine {
+  animation: al-shine-loop 5s ease-in-out 1s infinite;
+}
+
+/* ---------- loading ---------- */
+.al[data-variant="loading"] .al-roof,
+.al[data-variant="loading"] .al-l,
+.al[data-variant="loading"] .al-leaf {
+  animation: al-pulse 1.2s ease-in-out infinite;
+}
+.al[data-variant="loading"] .al-roof {
+  transform-origin: center bottom;
+}
+.al[data-variant="loading"] .al-l {
+  animation-delay: 0.15s;
+}
+.al[data-variant="loading"] .al-leaf {
+  transform-origin: 0% 100%;
+  animation-delay: 0.3s;
+}
+
+/* ---------- keyframes ---------- */
+@keyframes al-pop {
+  from { opacity: 0; transform: scale(0.5) rotate(-8deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes al-drop {
+  0%   { opacity: 0; transform: translateY(-38px) scaleY(0.8); }
+  60%  { opacity: 1; transform: translateY(3px) scaleY(1.05); }
+  100% { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+@keyframes al-reveal-down {
+  from { clip-path: inset(0 0 100% 0 round 7px); }
+  to   { clip-path: inset(0 0 0 0 round 0); }
+}
+
+@keyframes al-sprout {
+  from { opacity: 0; transform: scale(0) rotate(-35deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes al-sway {
+  0%, 100% { transform: rotate(0deg); }
+  30%      { transform: rotate(-7deg); }
+  65%      { transform: rotate(4deg); }
+}
+
+@keyframes al-shine {
+  from { transform: translateX(-140px) skewX(-20deg); }
+  to   { transform: translateX(210px) skewX(-20deg); }
+}
+
+/* One sweep, then a pause before the next one. */
+@keyframes al-shine-loop {
+  0%        { transform: translateX(-140px) skewX(-20deg); }
+  22%, 100% { transform: translateX(210px) skewX(-20deg); }
+}
+
+@keyframes al-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4%); }
+}
+
+@keyframes al-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  45%      { opacity: 0.45; transform: scale(0.9); }
+}
+
+/* Respect the user's "reduce motion" setting: show the finished logo. */
+@media (prefers-reduced-motion: reduce) {
+  .al,
+  .al * {
+    animation: none !important;
+  }
+}

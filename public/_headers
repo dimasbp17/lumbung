@@ -1,0 +1,15 @@
+# Cloudflare Pages response headers (copied to dist/ at build time).
+
+# Hashed build output never changes → cache for a year.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The user guide can change between releases → let browsers revalidate.
+/downloads/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self), microphone=(), geolocation=()

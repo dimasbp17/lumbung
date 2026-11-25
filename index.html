@@ -1,0 +1,24 @@
+﻿<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/images/logo-lumbung.svg" />
+    <link rel="apple-touch-icon" href="/images/logo-lumbung.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Lumbung — catatan keuangan keluarga" />
+    <title>Lumbung — Keuangan Keluarga</title>
+    <script>
+      // Apply the theme before React loads so the screen does not flash.
+      // "lumbung:tema" is the legacy key (migrated by src/lib/storage.ts).
+      try {
+        var t = localStorage.getItem("lumbung:theme") || localStorage.getItem("lumbung:tema") || "system";
+        var dark = t === "dark" || (t === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+        if (dark) document.documentElement.classList.add("dark");
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
