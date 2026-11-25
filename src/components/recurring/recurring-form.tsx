@@ -17,7 +17,7 @@ import { useDeleteRecurring, useSaveRecurring } from "@/hooks/use-recurring"
 import { useWallets } from "@/hooks/use-wallets"
 import { errorMessage } from "@/lib/error"
 import { todayWib } from "@/lib/format"
-import { frequencyLabels, frequencyUnit } from "@/lib/recurrence"
+import { addRecurrence, frequencyLabels, frequencyUnit, recurrenceLabel } from "@/lib/recurrence"
 import { cn } from "@/lib/utils"
 import type { RecurrenceFrequency, RecurringTransaction, TransactionType } from "@/types"
 
@@ -50,7 +50,8 @@ export function RecurringForm({ recurring, onDone }: RecurringFormProps) {
   const [toWalletId, setToWalletId] = useState<string | null>(recurring?.to_wallet_id ?? null)
   const [frequency, setFrequency] = useState<RecurrenceFrequency>(recurring?.frequency ?? "monthly")
   const [intervalCount, setIntervalCount] = useState(recurring?.interval_count ?? 1)
-  const [nextDate, setNextDate] = useState(recurring?.next_date ?? todayWib())
+  // Null while the user hasn't picked a date: it then follows the chosen frequency.
+  const [manualNextDate, setNextDate] = useState<string | null>(recurring?.next_date ?? null)
   const [endDate, setEndDate] = useState(recurring?.end_date ?? "")
   const [note, setNote] = useState(recurring?.note ?? "")
   const [isActive, setIsActive] = useState(recurring?.is_active ?? true)
@@ -58,6 +59,7 @@ export function RecurringForm({ recurring, onDone }: RecurringFormProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   const walletId = selectedWalletId ?? wallets[0]?.id ?? null
+  const nextDate = manualNextDate ?? addRecurrence(todayWib(), frequency, intervalCount)
   const categories = allCategories.filter(
     (c) => c.type === type && (c.is_active || c.id === recurring?.category_id)
   )
@@ -247,6 +249,12 @@ export function RecurringForm({ recurring, onDone }: RecurringFormProps) {
             aria-invalid={Boolean(errors.nextDate) || undefined}
             className="h-12 text-base"
           />
+          {manualNextDate === null && (
+            <p className="text-xs text-muted-foreground">
+              Otomatis {recurrenceLabel(frequency, intervalCount).toLowerCase()} dari hari ini. Ubah bila
+              tanggalnya berbeda.
+            </p>
+          )}
         </Field>
         <Field label="Berakhir (opsional)" htmlFor="recurring-end" error={errors.endDate}>
           <Input

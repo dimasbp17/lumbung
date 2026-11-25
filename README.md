@@ -90,6 +90,10 @@ cukup daftar akun baru.
   - Akun baru otomatis mendapat profil *Suami* & *Istri*, dompet *Dompet Tunai*, dan kategori bawaan
   - Profil anggota bisa ditambah/diubah/dihapus (nama + warna avatar)
   - "Dicatat oleh" pada setiap transaksi; profil terakhir diingat per perangkat
+  - Form transaksi: dompet dipilih lewat chip yang selalu terlihat (tepat setelah nominal),
+    default ke dompet terakhir yang dipakai di perangkat
+  - Transaksi baru dengan kategori yang sama dengan tagihan yang jatuh tempo (≤ 7 hari) menawarkan
+    "tandai tagihan lunas" agar tidak tercatat dua kali
   - Data tiap akun terisolasi dengan Row Level Security
 - **Dompet**: Tunai, Rekening Bank, E-Wallet, Lainnya — nama, ikon, warna, saldo awal;
   saldo dihitung otomatis; transfer antar dompet tidak dihitung sebagai pemasukan/pengeluaran

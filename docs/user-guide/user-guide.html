@@ -398,7 +398,8 @@
     <div class="mock"><span class="on-red">Pengeluaran</span><span>Pemasukan</span><span>Transfer</span></div>
   </li>
   <li>Ketik <strong>nominal</strong>.</li>
-  <li>Pilih <strong>kategori</strong> dengan mengetuk ikonnya, lalu pilih <strong>dompet</strong>. Untuk transfer, pilih dompet asal dan dompet tujuan.</li>
+  <li>Ketuk <strong>dompet</strong> yang dipakai. Semua dompet tampil berjajar beserta saldonya (geser ke samping jika banyak). Lumbung otomatis memilih dompet yang terakhir Anda pakai di perangkat ini, jadi cukup periksa sekilas. Untuk transfer, pilih dompet asal dan dompet tujuan.</li>
+  <li>Pilih <strong>kategori</strong> dengan mengetuk ikonnya.</li>
   <li>Periksa <strong>tanggal</strong> (otomatis hari ini), tambahkan <strong>catatan</strong> bila perlu, misal "belanja di pasar".</li>
   <li>Pastikan <strong>Dicatat oleh</strong> sudah benar, lalu tekan <span class="ui">Simpan</span>.</li>
 </ol>
@@ -571,7 +572,7 @@
   <li>Pilih jenisnya (biasanya <em>Pengeluaran</em>; gaji memakai <em>Pemasukan</em>), isi nama dan nominal.</li>
   <li>Pilih kategori dan dompet yang biasa dipakai membayar.</li>
   <li>Atur pengulangan: <em>Mingguan</em>, <em>Bulanan</em>, atau <em>Tahunan</em>, dan "setiap berapa" (misal setiap 3 bulan).</li>
-  <li>Isi <strong>jatuh tempo berikutnya</strong>, dan tanggal berakhir bila tagihannya punya batas (misal cicilan 12 bulan).</li>
+  <li>Periksa <strong>jatuh tempo berikutnya</strong>. Tanggalnya terisi otomatis sesuai pengulangan yang dipilih, dihitung dari hari ini (misal <em>Bulanan</em> → tanggal yang sama bulan depan). Ubah bila jatuh temponya berbeda; setelah diubah, tanggal tidak lagi mengikuti pengulangan. Isi juga tanggal berakhir bila tagihannya punya batas (misal cicilan 12 bulan).</li>
 </ol>
 <div class="note">
   <span class="label">Tagihan yang nominalnya berubah</span>
@@ -588,6 +589,10 @@
   <span class="label">Penting</span>
   <p>Lumbung <strong>tidak</strong> mencatat tagihan secara otomatis. Tagihan baru masuk ke transaksi setelah Anda menekan <span class="ui">Catat</span>, sehingga catatan selalu sesuai dengan uang yang benar-benar keluar.</p>
 </div>
+<h3>Jangan dicatat dua kali</h3>
+<p>Untuk membayar tagihan, cukup tekan <span class="ui">Catat</span> di tagihannya; tidak perlu mencatat lagi di Transaksi. Kalau Anda terbiasa mencatat lewat tombol <strong>+</strong>, Lumbung membantu mencegah catatan dobel: saat kategori yang dipilih sama dengan tagihan yang jatuh tempo (atau jatuh tempo dalam 7 hari), muncul pertanyaan <em>Ini pembayaran "Listrik PLN"?</em> dengan sakelar yang sudah menyala. Simpan seperti biasa, dan tagihan itu ditandai lunas lalu pindah ke jadwal berikutnya. Matikan sakelarnya bila transaksi itu bukan pembayaran tagihan (misal membeli lampu dengan kategori yang sama).</p>
+<p>Kalau sudah terlanjur dobel, hapus salah satu transaksinya di halaman Transaksi.</p>
+
 <p>Untuk menghentikan sementara, buka tagihan dan matikan sakelar <span class="ui">Aktif</span>.</p>
 
 <!-- ====================================================================== -->

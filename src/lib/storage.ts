@@ -2,6 +2,7 @@
 export const STORAGE_KEYS = {
   theme: "lumbung:theme",
   lastMember: "lumbung:last-member",
+  lastWallet: "lumbung:last-wallet",
 } as const
 
 /** Old (Indonesian) key → new key. */

@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
+import { addDays } from "@/lib/format"
 import { supabase } from "@/lib/supabase"
-import type { RecurringTransaction } from "@/types"
+import type { RecurringTransaction, TransactionType } from "@/types"
 
 const QUERY_KEY = ["recurring"] as const
 
@@ -25,6 +26,32 @@ export function useRecurringTransactions() {
 /** Finished = the next occurrence falls after the end date. */
 export function isRecurringFinished(r: RecurringTransaction): boolean {
   return r.end_date !== null && r.next_date > r.end_date
+}
+
+/** How many days before its due date a payment still counts as paying a bill. */
+const PAY_AHEAD_DAYS = 7
+
+/**
+ * The bill a new transaction most likely pays: an active income/expense bill of
+ * the same type and category, due by `date` + 7 days (overdue included).
+ * Earliest due date first.
+ */
+export function findMatchingBill(
+  bills: RecurringTransaction[],
+  t: { type: TransactionType; categoryId: string | null; date: string }
+): RecurringTransaction | null {
+  if (t.type === "transfer" || !t.categoryId || !t.date) return null
+  const horizon = addDays(t.date, PAY_AHEAD_DAYS)
+  return (
+    bills.find(
+      (r) =>
+        r.is_active &&
+        !isRecurringFinished(r) &&
+        r.type === t.type &&
+        r.category_id === t.categoryId &&
+        r.next_date <= horizon
+    ) ?? null
+  )
 }
 
 export type RecurringInput = Omit<RecurringTransaction, "id" | "start_date"> & { id?: string }

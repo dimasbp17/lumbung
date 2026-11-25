@@ -7,18 +7,25 @@ import { ConfirmDelete } from "@/components/common/confirm-delete"
 import { Field } from "@/components/common/field"
 import { CategoryPicker } from "@/components/transactions/category-picker"
 import { MemberPicker } from "@/components/transactions/member-picker"
-import { WalletPicker } from "@/components/transactions/wallet-picker"
+import { WalletChips } from "@/components/transactions/wallet-chips"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useCategories } from "@/hooks/use-categories"
 import { useLastMember, useMembers } from "@/hooks/use-members"
+import {
+  findMatchingBill,
+  useRecurringTransactions,
+  useSkipRecurring,
+} from "@/hooks/use-recurring"
 import { useDeleteTransaction, useSaveTransaction } from "@/hooks/use-transactions"
-import { useWallets } from "@/hooks/use-wallets"
+import { lastWalletId, rememberWallet, useWallets } from "@/hooks/use-wallets"
 import { errorMessage } from "@/lib/error"
-import { todayWib } from "@/lib/format"
+import { dueLabel, formatRupiah, formatShortDate, todayWib } from "@/lib/format"
+import { nextRecurrenceDate } from "@/lib/recurrence"
 import { cn } from "@/lib/utils"
-import type { Transaction, TransactionType } from "@/types"
+import type { RecurringTransaction, Transaction, TransactionType } from "@/types"
 
 interface TransactionFormProps {
   /** Set when editing an existing transaction */
@@ -53,7 +60,9 @@ export function TransactionForm({ transaction, initialType, onDone }: Transactio
   const { data: wallets = [] } = useWallets()
   const { data: members = [] } = useMembers()
   const { memberId: lastMemberId, setLastMember } = useLastMember()
+  const { data: bills = [] } = useRecurringTransactions()
   const save = useSaveTransaction()
+  const skipBill = useSkipRecurring()
   const remove = useDeleteTransaction()
 
   const [type, setType] = useState<TransactionType>(
@@ -70,6 +79,8 @@ export function TransactionForm({ transaction, initialType, onDone }: Transactio
   )
   const [errors, setErrors] = useState<FormErrors>({})
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // Bill the user said this transaction does NOT pay (switch turned off).
+  const [declinedBillId, setDeclinedBillId] = useState<string | null>(null)
 
   // A field's error message disappears as soon as that field changes.
   const clearingErrors =
@@ -85,12 +96,17 @@ export function TransactionForm({ transaction, initialType, onDone }: Transactio
   const setAmount = clearingErrors(setAmountState, "amount")
   const setDate = clearingErrors(setDateState, "date")
   const setCategoryId = clearingErrors(setCategoryIdState, "category")
-  const setWalletId = clearingErrors(setWalletIdState, "wallet", "toWallet")
+  const setWalletId = clearingErrors((id: string | null) => {
+    setWalletIdState(id)
+    // A transfer can't go to the same wallet: drop the destination if it now matches.
+    if (id && id === toWalletId) setToWalletIdState(null)
+  }, "wallet", "toWallet")
   const setToWalletId = clearingErrors(setToWalletIdState, "toWallet")
 
   // Defaults follow the latest data until the user picks something
   // (wallet/member data may finish loading after the form opens).
-  const walletId = selectedWalletId ?? wallets[0]?.id ?? null
+  // Wallet: the one last used on this device, otherwise the first wallet.
+  const walletId = selectedWalletId ?? lastWalletId(wallets) ?? wallets[0]?.id ?? null
   const recorder = selectedRecorder === undefined ? lastMemberId : selectedRecorder
 
   // Categories shown: active and of the current type. When editing, an old
@@ -98,6 +114,11 @@ export function TransactionForm({ transaction, initialType, onDone }: Transactio
   const categories = allCategories.filter(
     (c) => c.type === type && (c.is_active || c.id === transaction?.category_id)
   )
+
+  // A new transaction in the same category as a due bill is probably paying it:
+  // offer to mark the bill paid so it isn't recorded twice.
+  const matchingBill = transaction ? null : findMatchingBill(bills, { type, categoryId, date })
+  const paysBill = matchingBill !== null && matchingBill.id !== declinedBillId
 
   const changeType = (next: TransactionType) => {
     setType(next)
@@ -139,11 +160,26 @@ export function TransactionForm({ transaction, initialType, onDone }: Transactio
         recorded_by: recorder,
       })
       if (recorder) setLastMember(recorder)
-      toast.success(transaction ? "Transaksi diperbarui" : "Transaksi dicatat")
-      onDone()
+      if (type !== "transfer") rememberWallet(walletId!)
     } catch (err) {
       toast.error(errorMessage(err))
+      return
     }
+
+    if (paysBill) {
+      // Moves the bill's due date on without creating a second transaction.
+      try {
+        await skipBill.mutateAsync(matchingBill.id)
+        toast.success(`Transaksi dicatat, "${matchingBill.name}" ditandai lunas`)
+      } catch (err) {
+        toast.error(
+          `Transaksi dicatat, tapi "${matchingBill.name}" gagal ditandai lunas: ${errorMessage(err)}. Tekan Lewati di halaman Tagihan rutin.`
+        )
+      }
+    } else {
+      toast.success(transaction ? "Transaksi diperbarui" : "Transaksi dicatat")
+    }
+    onDone()
   }
 
   const handleDelete = async () => {
@@ -196,9 +232,9 @@ export function TransactionForm({ transaction, initialType, onDone }: Transactio
 
       {type === "transfer" ? (
         <div className="grid gap-2">
-          <Field label="Dari dompet" htmlFor="wallet" error={errors.wallet}>
-            <WalletPicker
-              id="wallet"
+          <Field label="Dari dompet" error={errors.wallet}>
+            <WalletChips
+              label="Dari dompet"
               wallets={wallets}
               value={walletId}
               onChange={setWalletId}
@@ -206,20 +242,28 @@ export function TransactionForm({ transaction, initialType, onDone }: Transactio
             />
           </Field>
           <ArrowDown className="mx-auto size-5 text-muted-foreground" aria-hidden />
-          <Field label="Ke dompet" htmlFor="to-wallet" error={errors.toWallet}>
-            <WalletPicker
-              id="to-wallet"
+          <Field label="Ke dompet" error={errors.toWallet}>
+            <WalletChips
+              label="Ke dompet"
               wallets={wallets}
               value={toWalletId}
               onChange={setToWalletId}
               exclude={walletId}
               invalid={Boolean(errors.toWallet)}
-              placeholder="Pilih dompet tujuan"
             />
           </Field>
         </div>
       ) : (
         <>
+          <Field label="Dompet" error={errors.wallet}>
+            <WalletChips
+              label="Dompet"
+              wallets={wallets}
+              value={walletId}
+              onChange={setWalletId}
+              invalid={Boolean(errors.wallet)}
+            />
+          </Field>
           <Field label="Kategori" error={errors.category}>
             <CategoryPicker
               categories={categories}
@@ -228,15 +272,13 @@ export function TransactionForm({ transaction, initialType, onDone }: Transactio
               invalid={Boolean(errors.category)}
             />
           </Field>
-          <Field label="Dompet" htmlFor="wallet" error={errors.wallet}>
-            <WalletPicker
-              id="wallet"
-              wallets={wallets}
-              value={walletId}
-              onChange={setWalletId}
-              invalid={Boolean(errors.wallet)}
+          {matchingBill && (
+            <BillPaymentToggle
+              bill={matchingBill}
+              checked={paysBill}
+              onCheckedChange={(on) => setDeclinedBillId(on ? null : matchingBill.id)}
             />
-          </Field>
+          )}
         </>
       )}
 
@@ -283,8 +325,13 @@ export function TransactionForm({ transaction, initialType, onDone }: Transactio
         ) : (
           <span />
         )}
-        <Button type="submit" size="lg" disabled={save.isPending} className="sm:min-w-40">
-          {save.isPending ? "Menyimpan…" : "Simpan"}
+        <Button
+          type="submit"
+          size="lg"
+          disabled={save.isPending || skipBill.isPending}
+          className="sm:min-w-40"
+        >
+          {save.isPending || skipBill.isPending ? "Menyimpan…" : "Simpan"}
         </Button>
       </div>
 
@@ -297,5 +344,37 @@ export function TransactionForm({ transaction, initialType, onDone }: Transactio
         pending={remove.isPending}
       />
     </form>
+  )
+}
+
+interface BillPaymentToggleProps {
+  bill: RecurringTransaction
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+}
+
+/** "Is this the payment for <bill>?" — marking it paid moves the bill to its next due date. */
+function BillPaymentToggle({ bill, checked, onCheckedChange }: BillPaymentToggleProps) {
+  const next = nextRecurrenceDate(bill.start_date, bill.frequency, bill.interval_count, bill.next_date)
+  const finishes = bill.end_date !== null && next > bill.end_date
+  return (
+    <label
+      htmlFor="pays-bill"
+      className="flex cursor-pointer items-start justify-between gap-4 rounded-2xl border border-primary/30 bg-accent/60 p-4"
+    >
+      <span className="min-w-0 text-sm">
+        <span className="block font-semibold">Ini pembayaran "{bill.name}"?</span>
+        <span className="block text-muted-foreground">
+          Tagihan {formatRupiah(bill.amount)}, jatuh tempo {formatShortDate(bill.next_date)} (
+          {dueLabel(bill.next_date).toLowerCase()}).{" "}
+          {checked
+            ? finishes
+              ? "Tagihan ditandai lunas dan selesai."
+              : `Tagihan ditandai lunas, jatuh tempo berikutnya ${formatShortDate(next, true)}.`
+            : "Tagihan tetap menunggu dibayar."}
+        </span>
+      </span>
+      <Switch id="pays-bill" checked={checked} onCheckedChange={onCheckedChange} className="mt-1" />
+    </label>
   )
 }

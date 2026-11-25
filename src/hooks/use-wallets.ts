@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
+import { STORAGE_KEYS } from "@/lib/storage"
 import { supabase } from "@/lib/supabase"
 import type { Wallet, WalletWithBalance } from "@/types"
 
@@ -113,4 +114,26 @@ export function useWalletBreakdown(walletId: string | null) {
       return b
     },
   })
+}
+
+// ---------------------------------------------------------------------------
+// Last used wallet — stored per device (localStorage)
+// ---------------------------------------------------------------------------
+
+/** Wallet last used for an income/expense on this device, if it still exists. */
+export function lastWalletId(wallets: Pick<Wallet, "id">[]): string | null {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.lastWallet)
+    return wallets.find((w) => w.id === stored)?.id ?? null
+  } catch {
+    return null
+  }
+}
+
+export function rememberWallet(id: string) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.lastWallet, id)
+  } catch {
+    // ignore: private mode / storage blocked
+  }
 }
