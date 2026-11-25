@@ -397,7 +397,7 @@
   <li>Pilih jenis transaksi di bagian atas:
     <div class="mock"><span class="on-red">Pengeluaran</span><span>Pemasukan</span><span>Transfer</span></div>
   </li>
-  <li>Ketik <strong>nominal</strong>.</li>
+  <li>Ketik <strong>nominal</strong>. Beli makan tiga kali dan baru dicatat malam hari? Tidak perlu menjumlah sendiri: tekan ikon <strong>kalkulator</strong> di ujung kanan kolom nominal, lalu ketik <em>25000 + 21000 + 21700</em> dengan tombol di layar. Totalnya langsung tampil; tekan <span class="ui">Pakai Rp 67.700</span> untuk memasukkannya ke nominal. Ada juga tombol <span class="ui">000</span>, <span class="ui">−</span>, dan <span class="ui">×</span> (misal <em>3 × 25.000</em>). Rinciannya tidak ikut tersimpan; tulis di catatan bila perlu.</li>
   <li>Ketuk <strong>dompet</strong> yang dipakai. Semua dompet tampil berjajar beserta saldonya (geser ke samping jika banyak). Lumbung otomatis memilih dompet yang terakhir Anda pakai di perangkat ini, jadi cukup periksa sekilas. Untuk transfer, pilih dompet asal dan dompet tujuan.</li>
   <li>Pilih <strong>kategori</strong> dengan mengetuk ikonnya.</li>
   <li>Periksa <strong>tanggal</strong> (otomatis hari ini), tambahkan <strong>catatan</strong> bila perlu, misal "belanja di pasar".</li>
@@ -532,11 +532,25 @@
   <span class="muted" style="font-size: 9pt">Rp 1.720.000 dari Rp 2.000.000 · Sisa Rp 280.000</span>
 </div>
 <ul>
-  <li><strong>Hampir habis</strong> muncul saat pemakaian mencapai 80% atau lebih.</li>
+  <li><strong>Hampir habis</strong> muncul saat pemakaian (termasuk yang dipesan tagihan) mencapai 80% atau lebih.</li>
   <li><strong>Terlampaui</strong> (merah) muncul saat pengeluaran melebihi batas; tertulis berapa kelebihannya.</li>
   <li>Gunakan tombol panah untuk melihat anggaran periode sebelumnya.</li>
 </ul>
 <p>Anggaran yang paling mendekati batas juga ditampilkan di Beranda.</p>
+
+<h3>Dipesan tagihan</h3>
+<p>Tagihan rutin yang belum dibayar ikut diperhitungkan, supaya sejak awal periode Anda tahu sisa yang benar-benar aman dibelanjakan. Tagihan pengeluaran yang aktif dan jatuh tempo di periode ini (termasuk yang terlambat) "memesan" anggaran kategorinya. Bagian ini tampil sebagai <strong>bagian bergaris</strong> di bilah progres.</p>
+<div class="card" style="width: 120mm; margin-bottom: 4mm">
+  <strong>Listrik &amp; Air</strong>
+  <div class="progress" style="display:flex"><div style="width: 20%; background: #0891b2"></div><div style="width: 41%; background: repeating-linear-gradient(-45deg, #0891b277 0 3px, #0891b233 3px 6px)"></div></div>
+  <span class="muted" style="font-size: 9pt">Rp 100.000 dari Rp 500.000 · Sisa aman Rp 196.200<br />Dipesan tagihan Rp 203.800</span>
+</div>
+<ul>
+  <li>Contoh di atas: token listrik Rp 101.900 setiap 2 minggu jatuh tempo dua kali di periode ini, jadi dipesan Rp 203.800.</li>
+  <li>Setelah tagihan ditekan <span class="ui">Catat</span>, nominalnya pindah dari "dipesan" ke "terpakai". Kalau ditekan <span class="ui">Lewati</span>, pesanannya hilang.</li>
+  <li><strong>Kurang untuk tagihan</strong> (merah) muncul bila sisa anggaran tidak cukup untuk tagihan yang belum dibayar.</li>
+  <li>Agar terhitung, kategori tagihan harus sama dengan kategori anggarannya. Periode yang sudah lewat tidak menampilkan pesanan.</li>
+</ul>
 
 <!-- ====================================================================== -->
 <h2 class="chapter" id="tabungan"><span class="chapter-no">Bab 9</span><br />Tujuan tabungan</h2>

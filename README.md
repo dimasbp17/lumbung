@@ -92,6 +92,8 @@ cukup daftar akun baru.
   - "Dicatat oleh" pada setiap transaksi; profil terakhir diingat per perangkat
   - Form transaksi: dompet dipilih lewat chip yang selalu terlihat (tepat setelah nominal),
     default ke dompet terakhir yang dipakai di perangkat
+  - Kalkulator di kolom nominal (tombol di layar: angka, 000, + − ×, hapus) untuk menjumlah
+    beberapa belanja sekaligus; tombol "Pakai" memasukkan totalnya
   - Transaksi baru dengan kategori yang sama dengan tagihan yang jatuh tempo (≤ 7 hari) menawarkan
     "tandai tagihan lunas" agar tidak tercatat dua kali
   - Data tiap akun terisolasi dengan Row Level Security
@@ -112,7 +114,9 @@ cukup daftar akun baru.
 ### ✅ Fase 2 — Pengelolaan lanjutan (selesai)
 
 - **Anggaran** (`/anggaran`): batas belanja per kategori pengeluaran, berlaku setiap periode;
-  progres terpakai/sisa, tanda "Hampir habis" (≥ 80%) dan "Terlampaui"; ringkasan di Beranda
+  progres terpakai/sisa, tanda "Hampir habis" (≥ 80%) dan "Terlampaui"; ringkasan di Beranda;
+  "dipesan tagihan": tagihan rutin yang belum dibayar di periode ini mengurangi "sisa aman"
+  (segmen bergaris), dengan tanda "Kurang untuk tagihan"
 - **Tujuan tabungan** (`/tabungan`): target dana & tanggal, setoran/penarikan dengan riwayat,
   saran nominal per bulan; setoran bisa diambil dari dompet (saldo dompet ikut menyesuaikan)
 - **Tagihan rutin & transaksi berulang** (`/tagihan`): mingguan/bulanan/tahunan (setiap N),

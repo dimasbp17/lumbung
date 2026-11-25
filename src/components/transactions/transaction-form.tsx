@@ -227,6 +227,7 @@ export function TransactionForm({ transaction, initialType, onDone }: Transactio
           onChange={setAmount}
           invalid={Boolean(errors.amount)}
           autoFocus={!transaction}
+          calculator
         />
       </Field>
 
