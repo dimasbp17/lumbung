@@ -10,8 +10,14 @@ import { PageHeader } from "@/components/layout/page-header"
 import { PeriodNavigator } from "@/components/period/period-navigator"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { budgetProgress, useBudgets } from "@/hooks/use-budgets"
+import {
+  budgetProgress,
+  budgetRemainingLabel,
+  reservedByCategory,
+  useBudgets,
+} from "@/hooks/use-budgets"
 import { useCategories } from "@/hooks/use-categories"
+import { useRecurringTransactions } from "@/hooks/use-recurring"
 import { usePeriod } from "@/hooks/use-settings"
 import { useTransactionsInRange } from "@/hooks/use-transactions"
 import { errorMessage } from "@/lib/error"
@@ -28,6 +34,7 @@ export function BudgetsPage() {
   const budgets = useBudgets()
   const { data: categories = [] } = useCategories()
   const transactions = useTransactionsInRange(period.start, period.end)
+  const bills = useRecurringTransactions()
 
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<Budget | null>(null)
@@ -41,13 +48,15 @@ export function BudgetsPage() {
 
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories])
 
-  const rows = useMemo(
-    () =>
-      budgetProgress(budgets.data ?? [], transactions.data ?? []).sort((a, b) => b.ratio - a.ratio),
-    [budgets.data, transactions.data]
-  )
+  const rows = budgetProgress(
+    budgets.data ?? [],
+    transactions.data ?? [],
+    reservedByCategory(bills.data ?? [], period)
+  ).sort((a, b) => b.committedRatio - a.committedRatio)
   const totalBudget = rows.reduce((s, r) => s + r.amount, 0)
   const totalSpent = rows.reduce((s, r) => s + r.spent, 0)
+  const totalReserved = rows.reduce((s, r) => s + r.reserved, 0)
+  const totalSafe = totalBudget - totalSpent - totalReserved
 
   // Categories offered in the form: active expense categories without a budget,
   // plus the one being edited.
@@ -102,25 +111,37 @@ export function BudgetsPage() {
                 <p
                   className={cn(
                     "text-sm font-medium tabular-nums",
-                    totalSpent > totalBudget ? "text-red-600 dark:text-red-400" : "text-muted-foreground"
+                    totalSafe < 0 ? "text-red-600 dark:text-red-400" : "text-muted-foreground"
                   )}
                 >
                   {totalSpent > totalBudget
                     ? `Lebih ${formatRupiah(totalSpent - totalBudget)}`
-                    : `Sisa ${formatRupiah(totalBudget - totalSpent)}`}
+                    : totalReserved === 0
+                      ? `Sisa ${formatRupiah(totalSafe)}`
+                      : totalSafe < 0
+                        ? `Kurang ${formatRupiah(-totalSafe)}`
+                        : `Sisa aman ${formatRupiah(totalSafe)}`}
                 </p>
               </div>
               <ProgressBar
                 value={totalBudget ? totalSpent / totalBudget : 0}
+                reserved={totalBudget ? totalReserved / totalBudget : 0}
                 danger={totalSpent > totalBudget}
                 label="Total anggaran terpakai"
               />
+              {totalReserved > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground tabular-nums">{formatRupiah(totalReserved)}</span>{" "}
+                  dipesan tagihan rutin yang belum dibayar periode ini (bagian bergaris).
+                </p>
+              )}
             </section>
 
             <div className="surface space-y-0.5 p-2">
               {rows.map((r) => {
                 const category = categoryById.get(r.category_id)
                 const over = r.ratio > 1
+                const status = budgetRemainingLabel(r)
                 return (
                   <button
                     key={r.id}
@@ -135,7 +156,9 @@ export function BudgetsPage() {
                           <span className="truncate font-semibold">{category?.name ?? "Kategori"}</span>
                           {over ? (
                             <Badge variant="destructive">Terlampaui</Badge>
-                          ) : r.ratio >= WARNING_RATIO ? (
+                          ) : r.committedRatio > 1 ? (
+                            <Badge variant="destructive">Kurang untuk tagihan</Badge>
+                          ) : r.committedRatio >= WARNING_RATIO ? (
                             <Badge variant="secondary">Hampir habis</Badge>
                           ) : null}
                         </span>
@@ -143,15 +166,25 @@ export function BudgetsPage() {
                           {Math.round(r.ratio * 100)}%
                         </span>
                       </span>
-                      <ProgressBar value={r.ratio} color={category?.color} danger={over} />
+                      <ProgressBar
+                        value={r.ratio}
+                        reserved={r.reserved / r.amount}
+                        color={category?.color}
+                        danger={over}
+                      />
                       <span className="flex justify-between gap-2 text-xs text-muted-foreground tabular-nums">
                         <span>
                           {formatRupiah(r.spent)} dari {formatRupiah(r.amount)}
                         </span>
-                        <span className={cn(over && "font-medium text-red-600 dark:text-red-400")}>
-                          {over ? `Lebih ${formatRupiah(-r.remaining)}` : `Sisa ${formatRupiah(r.remaining)}`}
+                        <span className={cn(status.danger && "font-medium text-red-600 dark:text-red-400")}>
+                          {status.text}
                         </span>
                       </span>
+                      {r.reserved > 0 && (
+                        <span className="block text-xs text-muted-foreground tabular-nums">
+                          Dipesan tagihan {formatRupiah(r.reserved)}
+                        </span>
+                      )}
                     </span>
                   </button>
                 )
