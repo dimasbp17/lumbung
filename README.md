@@ -100,7 +100,8 @@ cukup daftar akun baru.
 - **Dompet**: Tunai, Rekening Bank, E-Wallet, Lainnya — nama, ikon, warna, saldo awal;
   saldo dihitung otomatis; transfer antar dompet tidak dihitung sebagai pemasukan/pengeluaran
 - **Transaksi**: pemasukan, pengeluaran, transfer; tambah/ubah/hapus (dengan konfirmasi);
-  dikelompokkan per tanggal dengan total harian; navigasi per periode;
+  tampilan **Per kategori** (total, jumlah, porsi; ketuk untuk riwayat kategori itu) atau
+  **Semua transaksi** dikelompokkan per tanggal dengan total harian; navigasi per periode;
   tombol tambah selalu terlihat (tombol melayang di HP, tombol di sidebar di desktop)
 - **Kategori**: 14 kategori pengeluaran & 5 kategori pemasukan bawaan; bisa ditambah, diubah
   (nama, ikon, warna), dan dinonaktifkan

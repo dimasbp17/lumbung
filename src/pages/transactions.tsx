@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react"
-import { Plus, Receipt, Search, SlidersHorizontal, X } from "lucide-react"
+import { ChevronLeft, LayoutGrid, List, Plus, Receipt, Search, SlidersHorizontal, X } from "lucide-react"
 
 import { ResponsiveSheet } from "@/components/common/responsive-sheet"
 import { EmptyState, ErrorMessage, Loading } from "@/components/common/status"
 import { PageHeader } from "@/components/layout/page-header"
 import { PeriodNavigator } from "@/components/period/period-navigator"
-import { SignedAmount } from "@/components/transactions/transaction-amount"
+import { TRANSFER_GROUP, type CategoryGroup } from "@/components/transactions/category-group-values"
+import { CategoryGroupList, GroupIcon } from "@/components/transactions/category-groups"
+import { SignedAmount, TransactionAmount } from "@/components/transactions/transaction-amount"
 import {
   countFilters,
   emptyFilters,
@@ -14,6 +16,7 @@ import {
 import { TransactionFiltersForm } from "@/components/transactions/transaction-filters"
 import { TransactionList } from "@/components/transactions/transaction-list"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useLookups } from "@/hooks/use-lookups"
@@ -30,6 +33,17 @@ import { useTransactionForm } from "@/providers/transaction-form-context"
 
 const typeLabels = { expense: "Pengeluaran", income: "Pemasukan", transfer: "Transfer" } as const
 
+type ViewMode = "category" | "list"
+const VIEW_STORAGE_KEY = "lumbung:transactions-view"
+
+function readStoredView(): ViewMode {
+  try {
+    return localStorage.getItem(VIEW_STORAGE_KEY) === "list" ? "list" : "category"
+  } catch {
+    return "category"
+  }
+}
+
 export function TransactionsPage() {
   const [offset, setOffset] = useState(0)
   const period = usePeriod(offset)
@@ -41,6 +55,16 @@ export function TransactionsPage() {
   const [filters, setFilters] = useState<TransactionFilterValues>(emptyFilters)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [filtersKey, setFiltersKey] = useState(0)
+  const [view, setViewState] = useState<ViewMode>(readStoredView)
+
+  const setView = (next: ViewMode) => {
+    setViewState(next)
+    try {
+      localStorage.setItem(VIEW_STORAGE_KEY, next)
+    } catch {
+      // Storage unavailable (private mode): the choice just isn't remembered.
+    }
+  }
 
   // Categories whose name matches the search text also count as a match.
   const queryCategoryIds = useMemo(() => {
@@ -68,9 +92,38 @@ export function TransactionsPage() {
   const activeCount = countFilters(filters)
   const isFiltering = activeCount > 0 || Boolean(debouncedQuery)
 
+  // In the category view, a chosen category (or transfers) opens its history.
+  const isCategoryView = view === "category"
+  const openedCategory = filters.categoryId ? lookups.categories.get(filters.categoryId) : undefined
+  const openedGroup =
+    !isCategoryView
+      ? null
+      : filters.categoryId
+        ? {
+            type: openedCategory?.type ?? "expense",
+            name: openedCategory?.name ?? "Kategori",
+            icon: openedCategory?.icon ?? null,
+            color: openedCategory?.color ?? "#64748b",
+          }
+        : filters.type === "transfer"
+          ? { type: "transfer" as const, name: "Transfer", icon: null, color: "#64748b" }
+          : null
+
+  const openGroup = (g: CategoryGroup) =>
+    setFilters((f) =>
+      g.key === TRANSFER_GROUP
+        ? { ...f, type: "transfer", categoryId: undefined }
+        : { ...f, categoryId: g.key }
+    )
+  const closeGroup = () =>
+    setFilters((f) =>
+      f.categoryId ? { ...f, categoryId: undefined } : { ...f, type: undefined }
+    )
+
   const chips: { key: keyof TransactionFilterValues | "range"; label: string; clear: Partial<TransactionFilterValues> }[] = []
-  if (filters.type) chips.push({ key: "type", label: typeLabels[filters.type], clear: { type: undefined } })
-  if (filters.categoryId)
+  if (filters.type && !(openedGroup && filters.type === "transfer"))
+    chips.push({ key: "type", label: typeLabels[filters.type], clear: { type: undefined } })
+  if (filters.categoryId && !openedGroup)
     chips.push({
       key: "categoryId",
       label: lookups.categories.get(filters.categoryId)?.name ?? "Kategori",
@@ -168,6 +221,17 @@ export function TransactionsPage() {
           )}
         </div>
 
+        <Tabs value={view} onValueChange={(v) => setView(v as ViewMode)}>
+          <TabsList className="w-full">
+            <TabsTrigger value="category" className="h-9">
+              <LayoutGrid /> Per kategori
+            </TabsTrigger>
+            <TabsTrigger value="list" className="h-9">
+              <List /> Semua transaksi
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {filters.scope === "period" && (
           <PeriodNavigator period={period} offset={offset} onOffsetChange={setOffset} />
         )}
@@ -191,7 +255,29 @@ export function TransactionsPage() {
 
         {error && <ErrorMessage message={errorMessage(error)} />}
 
-        {isFiltering && !isPending && (
+        {openedGroup && (
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="icon" className="size-11 shrink-0 rounded-xl" onClick={closeGroup} aria-label="Kembali ke semua kategori">
+              <ChevronLeft className="size-5" />
+            </Button>
+            <GroupIcon group={openedGroup} />
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate text-lg font-semibold">{openedGroup.name}</h2>
+              <p className="text-sm text-muted-foreground">
+                {isPending ? "Memuat…" : `${data.length} transaksi`}
+              </p>
+            </div>
+            {!isPending && (
+              <TransactionAmount
+                type={openedGroup.type}
+                amount={data.reduce((s, t) => s + t.amount, 0)}
+                className="text-lg"
+              />
+            )}
+          </div>
+        )}
+
+        {isFiltering && !isPending && !openedGroup && (
           <p className="px-1 text-sm text-muted-foreground" aria-live="polite">
             {isFetching
               ? "Mencari…"
@@ -204,7 +290,18 @@ export function TransactionsPage() {
         {isPending ? (
           <Loading />
         ) : data.length === 0 ? (
-          isFiltering ? (
+          openedGroup ? (
+            <EmptyState
+              icon={Receipt}
+              title="Belum ada transaksi"
+              description={`Tidak ada transaksi ${openedGroup.name} yang cocok di rentang waktu ini.`}
+              action={
+                <Button variant="outline" onClick={closeGroup}>
+                  Kembali ke semua kategori
+                </Button>
+              }
+            />
+          ) : isFiltering ? (
             <EmptyState
               icon={Search}
               title="Tidak ditemukan"
@@ -230,7 +327,11 @@ export function TransactionsPage() {
             />
           )
         ) : (
-          <TransactionList transactions={data} lookups={lookups} onSelect={openForm} />
+          isCategoryView && !openedGroup ? (
+            <CategoryGroupList transactions={data} lookups={lookups} onSelect={openGroup} />
+          ) : (
+            <TransactionList transactions={data} lookups={lookups} onSelect={openForm} />
+          )
         )}
       </div>
 
