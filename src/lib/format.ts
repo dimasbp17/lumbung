@@ -90,3 +90,11 @@ export function dueLabel(iso: string): string {
   if (days > 1) return `${days} hari lagi`
   return `Terlambat ${-days} hari`
 }
+
+/** "Hari ini", "Kemarin", or the long date — for day headers in transaction lists. */
+export function relativeDateLabel(iso: string): string {
+  const today = todayWib()
+  if (iso === today) return "Hari ini"
+  if (iso === addDays(today, -1)) return "Kemarin"
+  return formatLongDate(iso)
+}

@@ -4,20 +4,13 @@ import { SignedAmount } from "@/components/transactions/transaction-amount"
 import { TransactionCard } from "@/components/transactions/transaction-card"
 import type { Lookups } from "@/hooks/use-lookups"
 import { summarizeTransactions } from "@/hooks/use-transactions"
-import { addDays, formatLongDate, todayWib } from "@/lib/format"
+import { relativeDateLabel } from "@/lib/format"
 import type { Transaction } from "@/types"
 
 interface TransactionListProps {
   transactions: Transaction[]
   lookups: Lookups
   onSelect: (t: Transaction) => void
-}
-
-function dateLabel(iso: string): string {
-  const today = todayWib()
-  if (iso === today) return "Hari ini"
-  if (iso === addDays(today, -1)) return "Kemarin"
-  return formatLongDate(iso)
 }
 
 /** Transactions grouped by date, with a daily total. */
@@ -39,7 +32,7 @@ export function TransactionList({ transactions, lookups, onSelect }: Transaction
         return (
           <section key={date}>
             <header className="mb-2 flex items-center justify-between gap-2 px-1">
-              <h3 className="text-sm font-semibold text-muted-foreground">{dateLabel(date)}</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground">{relativeDateLabel(date)}</h3>
               <SignedAmount value={net} className="text-sm" />
             </header>
             <div className="surface space-y-0.5 p-2">

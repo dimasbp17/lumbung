@@ -12,11 +12,14 @@ export interface CategoryGroup {
   color: string
   count: number
   total: number
-  /** Newest transaction date in the group (ISO) */
-  lastDate: string
 }
 
-/** Sums transactions per category (transfers form a single group), largest total first. */
+const typeOrder: Record<TransactionType, number> = { expense: 0, income: 1, transfer: 2 }
+
+/**
+ * Sums transactions per category (transfers form a single group): expenses
+ * first, then income, then transfers; largest total first within each type.
+ */
 export function groupByCategory(transactions: Transaction[], lookups: Lookups): CategoryGroup[] {
   const groups = new Map<string, CategoryGroup>()
   for (const t of transactions) {
@@ -32,13 +35,34 @@ export function groupByCategory(transactions: Transaction[], lookups: Lookups): 
         color: category?.color ?? "#64748b",
         count: 0,
         total: 0,
-        lastDate: t.date,
       }
       groups.set(key, group)
     }
     group.count += 1
     group.total += t.amount
-    if (t.date > group.lastDate) group.lastDate = t.date
   }
-  return [...groups.values()].sort((a, b) => b.total - a.total)
+  return [...groups.values()].sort(
+    (a, b) => typeOrder[a.type] - typeOrder[b.type] || b.total - a.total
+  )
+}
+
+export interface DayCategoryGroups {
+  date: string
+  transactions: Transaction[]
+  groups: CategoryGroup[]
+}
+
+/** Per day (in the input's order, i.e. newest first), the day's transactions summed per category. */
+export function groupByDayAndCategory(transactions: Transaction[], lookups: Lookups): DayCategoryGroups[] {
+  const byDate = new Map<string, Transaction[]>()
+  for (const t of transactions) {
+    const items = byDate.get(t.date)
+    if (items) items.push(t)
+    else byDate.set(t.date, [t])
+  }
+  return [...byDate.entries()].map(([date, items]) => ({
+    date,
+    transactions: items,
+    groups: groupByCategory(items, lookups),
+  }))
 }
